@@ -1,4 +1,5 @@
 fastapi
 gunicorn
+pyjwt
 uvicorn==0.9
 venmo-api
