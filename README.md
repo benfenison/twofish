@@ -19,3 +19,5 @@ git clone https://github.com/benfenison/twofish
 heroku git:remote -a twofishtech
 git push heroku master
 ```
+
+API docs: [https://twofishtech.herokuapp.com/docs]
