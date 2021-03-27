@@ -53,7 +53,7 @@ class ResponseModel(SessionModel):
 
 @app.get("/")
 def hello():
-    return { "message": "Hello Twofishtech"}
+    return { "message": "Welcome to Twofish API" }
 
 
 @app.get('/api/v1/session')
