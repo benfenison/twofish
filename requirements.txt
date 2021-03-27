@@ -1,3 +1,2 @@
 fastapi
-gunicorn
-uvicorn
+uvicorn==0.9
