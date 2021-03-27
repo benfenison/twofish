@@ -13,13 +13,6 @@ TOKEN_LENGTH = 128
 MAX_TRANSFER_LIMIT = 99.999999999
 
 
-app = FastAPI(
-    title="Twofish API",
-    version="v1",
-)
-session_dict = dict()
-
-
 class SessionModel(BaseModel):
     session_id: str
 
@@ -49,6 +42,13 @@ class MoneyTransferModel(SessionModel):
 class ResponseModel(SessionModel):
     success: bool
     description: str
+
+
+app = FastAPI(
+    title="Twofish API",
+    version="v1",
+)
+session_dict = dict()
 
 
 @app.get("/")
