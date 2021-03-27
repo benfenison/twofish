@@ -1,2 +1,3 @@
 fastapi
+gunicorn
 uvicorn==0.9
