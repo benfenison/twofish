@@ -10,6 +10,7 @@ from venmo_session import VenmoSession
 
 
 TOKEN_LENGTH = 128
+MAX_TRANSFER_LIMIT = 99.999999999
 
 
 app = FastAPI(
@@ -37,6 +38,12 @@ class UserInfoModel(SessionModel):
     display_name: str
     id: str
     profile_picture_url: str
+
+
+class MoneyTransferModel(SessionModel):
+    target_user_id: str
+    amount: float
+    message: str
 
 
 class ResponseModel(SessionModel):
@@ -98,3 +105,19 @@ def get_user_info(body: SessionModel) -> Union[ResponseModel, UserInfoModel]:
     if result.get('id') == None:
         return ResponseModel(**result)
     return UserInfoModel(**result)
+
+
+@app.post('/api/v1/send_money')
+def send_money(body: MoneyTransferModel) -> ResponseModel:
+    session = session_dict.get(body.session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail='no session found for the session_id')
+    if body.amount > MAX_TRANSFER_LIMIT:
+        result = {
+            "success": False,
+            "description": "Maximum transferring limit exceeded. Try smaller amount."
+        }
+    else:
+        result = session.send_money(body.target_user_id, body.amount, body.message)
+    result['session_id'] = body.session_id
+    return ResponseModel(**result)

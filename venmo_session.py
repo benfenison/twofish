@@ -126,6 +126,11 @@ class VenmoSession:
                     "success": False,
                     "description": "Amount exceeded your Venmo balance."
                 }
+        except HttpCodeError:
+            return {
+                "success": False,
+                "description": "Not logged in. Call login method first."
+            }
         return {
             "success": False,
             "description": "Some error occured."
