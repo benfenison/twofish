@@ -68,6 +68,11 @@ class VenmoSession:
                 "success": False,
                 "description": "Not logged in. Call login method first."
             }
+        except HttpCodeError:
+            return {
+                "success": False,
+                "description": "Some error occured, try to login again."
+            }
 
         self.api_client.update_access_token(access_token=self.access_token)
         try:

@@ -9,7 +9,7 @@ from venmo_session import VenmoSession
 
 
 
-TOKEN_LENGTH = 128
+TOKEN_LENGTH = 48
 MAX_TRANSFER_LIMIT = 99.999999999
 
 
