@@ -9,7 +9,7 @@ from venmo_session import VenmoSession
 
 
 
-TOKEN_LENGTH = 48
+TOKEN_LENGTH = 32
 MAX_TRANSFER_LIMIT = 99.999999999
 
 
@@ -48,7 +48,24 @@ app = FastAPI(
     title="Twofish API",
     version="v1",
 )
-session_dict = dict()
+
+
+class SessionStore:
+
+    def __init__(self) -> None:
+        self._sessions = dict()
+
+    def set(self, key: str, session: VenmoSession):
+        self._sessions[key] = session
+    
+    def get(self, key: str):
+        if key in self._sessions.keys():
+            return self._sessions[key]
+        else:
+            return None
+
+
+session_store = SessionStore()
 
 
 @app.get("/")
@@ -59,13 +76,13 @@ def hello():
 @app.get('/api/v1/session')
 def get_session_id():
     session_id = secrets.token_urlsafe(TOKEN_LENGTH)
-    session_dict[session_id] = VenmoSession()
+    session_store.set(session_id, VenmoSession())
     return SessionModel(session_id=session_id)
 
 
 @app.post('/api/v1/login')
 def login(body: CredentialsModel) -> ResponseModel:
-    session = session_dict.get(body.session_id)
+    session = session_store.get(body.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail='no session found for the session_id')
     result = session.login(body.username, body.password)
@@ -75,7 +92,7 @@ def login(body: CredentialsModel) -> ResponseModel:
 
 @app.post('/api/v1/login_otp')
 def login_otp(body: OtpModel) -> ResponseModel:
-    session = session_dict.get(body.session_id)
+    session = session_store.get(body.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail='no session found for the session_id')
     result = session.login_otp(body.otp_code)
@@ -85,11 +102,10 @@ def login_otp(body: OtpModel) -> ResponseModel:
 
 @app.post('/api/v1/logout')
 def logout(body: SessionModel) -> ResponseModel:
-    session = session_dict.get(body.session_id)
+    session = session_store.get(body.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail='no session found for the session_id')
     result = session.logout()
-    session_dict.pop(body.session_id)
     del session
     result['session_id'] = body.session_id
     return ResponseModel(**result)
@@ -97,7 +113,7 @@ def logout(body: SessionModel) -> ResponseModel:
 
 @app.post('/api/v1/me')
 def get_user_info(body: SessionModel) -> Union[ResponseModel, UserInfoModel]:
-    session = session_dict.get(body.session_id)
+    session = session_store.get(body.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail='no session found for the session_id')
     result = session.get_user_info()
@@ -109,7 +125,7 @@ def get_user_info(body: SessionModel) -> Union[ResponseModel, UserInfoModel]:
 
 @app.post('/api/v1/send_money')
 def send_money(body: MoneyTransferModel) -> ResponseModel:
-    session = session_dict.get(body.session_id)
+    session = session_store.get(body.session_id)
     if session is None:
         raise HTTPException(status_code=404, detail='no session found for the session_id')
     if body.amount > MAX_TRANSFER_LIMIT:
